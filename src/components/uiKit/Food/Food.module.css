@@ -1,0 +1,9 @@
+.Food_dot{
+  position: absolute;
+  width: 3.5%;
+  height: 3.5%;
+  background-color: #c5c186;
+  border: 2px solid #424645;
+  margin: 0.4%;
+  z-index: 1;
+}
