@@ -6,7 +6,7 @@ const UP = 'UP'
 const DOWN = 'DOWN'
 const RIGHT = 'RIGHT'
 const LEFT = 'LEFT'
-
+ 
 const MAP_SIZE = 500
 const SPEED = 200
 
