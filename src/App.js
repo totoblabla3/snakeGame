@@ -6,7 +6,7 @@ const UP = 'UP'
 const DOWN = 'DOWN'
 const RIGHT = 'RIGHT'
 const LEFT = 'LEFT'
- 
+
 const MAP_SIZE = 500
 const SPEED = 200
 
@@ -20,6 +20,7 @@ const getRandomCoordinates = () => {
 const EntryState = {
   snake: {
     direction: RIGHT,
+    adjusted_direction: null,
     speed: SPEED,
     oldLength: [
       [0, 0],
@@ -45,7 +46,7 @@ export class App extends Component {
 
   componentDidMount() {
     alert("Начать игру")
-    setInterval(() => this._mouveSnake(), this.state.snake.speed)
+    setInterval(() => this._moveSnake(), this.state.snake.speed)
     document.onkeydown = this._onKeyDown
   }
 
@@ -90,42 +91,79 @@ export class App extends Component {
       oldLength.unshift(oldLength[0])
       this.setState({
         items: { food: getRandomCoordinates() },
-        snake: { ...this.state.snake, length: length, oldLength:oldLength }
+        snake: { ...this.state.snake, length: length, oldLength: oldLength }
       })
     }
   }
 
   _onKeyDown = (e) => {
     e = e || window.event
-    const { snake: { direction } } = this.state
-    let newDirection
+    const { direction } = this.state.snake
+    let { adjusted_direction } = this.state.snake
+
+    if (adjusted_direction) return
 
     switch (e.keyCode) {
       case 38: {
-        newDirection = direction !== DOWN ? (UP) : (DOWN)
+        adjusted_direction = direction !== DOWN ? (UP) : (DOWN)
         break
       }
       case 40: {
-        newDirection = direction !== UP ? (DOWN) : (UP)
+        adjusted_direction = direction !== UP ? (DOWN) : (UP)
         break
       }
       case 39: {
-        newDirection = direction !== LEFT ? (RIGHT) : (LEFT)
+        adjusted_direction = direction !== LEFT ? (RIGHT) : (LEFT)
         break
       }
       case 37: {
-        newDirection = direction !== RIGHT ? (LEFT) : (RIGHT)
+        adjusted_direction = direction !== RIGHT ? (LEFT) : (RIGHT)
         break
       }
-      default: { newDirection = direction }
+      default: { adjusted_direction = direction }
     }
-    this.setState({ snake: { ...this.state.snake, direction: newDirection } })
+    this.setState({
+      snake: {
+        ...this.state.snake,
+        direction,
+        adjusted_direction
+      }
+    })
   }
 
-  _mouveSnake() {
-    const { snake: { direction, length } } = this.state
+  _moveSnake() {
+    const { adjusted_direction, length } = this.state.snake
+    let { direction } = this.state.snake
     let newLength = [...this.state.snake.length]
     let head = length[length.length - 1]
+    let neck = length[length.length - 2]
+
+    // head - первый сегмент, neck - второй сегмент. 
+    // Каждый сегмент состоит из двух координат x и y и занимает 5 пикселей на игровом поле. 
+    // В следующем свиче проверяется, нет ли на пути скорректированного направления второго сегмента змейки. [][]->, []<-[].
+    // И если на пути второго сегмента нет, то направление движения поменяется на скорректированное. 
+
+    switch (adjusted_direction) {
+      case UP: {
+        if (head[1] - 5 !== neck[1]) direction = UP
+        break
+      }
+      case DOWN: {
+        if (head[1] + 5 !== neck[1]) direction = DOWN
+        break
+      }
+      case RIGHT: {
+        if (head[0] + 5 !== neck[0]) direction = RIGHT
+        break
+      }
+      case LEFT: {
+        if (head[0] - 5 !== neck[0]) direction = LEFT
+        break
+      }
+      default: {
+        console.warn('Неизвестное значение adjusted_direction: ', adjusted_direction)
+      }
+    }
 
     switch (direction) {
       case UP: {
@@ -144,6 +182,9 @@ export class App extends Component {
         head = [head[0] - 5, head[1]]
         break
       }
+      default: { 
+        console.warn('Неизвестное значение direction: ', direction)
+      }
     }
 
     newLength.push(head)
@@ -154,7 +195,9 @@ export class App extends Component {
       {
         ...this.state.snake,
         length: newLength,
-        oldLength: length
+        oldLength: length,
+        adjusted_direction: null,
+        direction
       }
     })
   }
