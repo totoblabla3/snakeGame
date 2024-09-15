@@ -80,9 +80,11 @@ export class App extends Component {
   game_cycle = undefined
 
   componentDidMount() {
+    document.onkeydown = this._onKeyDown
+
+    if (process.env.REACT_APP_DEV) return
     alert("Start the game?")
     this._play()
-    document.onkeydown = this._onKeyDown
   }
 
   componentDidUpdate() {
