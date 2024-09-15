@@ -256,10 +256,7 @@ export class App extends Component {
               }
             </div>
           </div>
-          <div
-            className="Map"
-            style={{ width: `${MAP_SIZE}px`, height: `${MAP_SIZE}px` }}
-          >
+          <div className="Map">
             <Snake speed={speed} oldLength={oldLength} length={length} />
             <Food food={food} />
           </div>

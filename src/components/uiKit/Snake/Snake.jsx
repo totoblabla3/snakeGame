@@ -25,7 +25,12 @@ const Item = styled.div`
     top: ${({ dot }) => dot[1]}%;
     animation-name : ${(({ dot, oldLength, i }) => moveVertically(dot, oldLength[i] || [oldLength[i - 1]]))};
     animation-duration: ${({speed}) => speed / 1000}s;
-    animation-timing-function: linear
+    animation-timing-function: linear;
+
+    @media (max-width: 440px) { 
+      border: 1px solid #424645;
+      margin: 0.15%;
+    }
 `
 
 export const Snake = ({ length, oldLength, speed }) => {

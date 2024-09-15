@@ -7,3 +7,10 @@
   margin: 0.4%;
   z-index: 1;
 }
+
+@media (max-width: 440px) { 
+  .Food_dot{
+    border: 1px solid #424645;
+    margin: 0.15%;
+  }
+}
