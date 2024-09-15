@@ -80,7 +80,7 @@ export class App extends Component {
   game_cycle = undefined
 
   componentDidMount() {
-    alert("Начать игру")
+    alert("Start the game?")
     this._play()
     document.onkeydown = this._onKeyDown
   }
@@ -229,7 +229,7 @@ export class App extends Component {
   }
 
   _gameOver() {
-    alert(`Ты проиграл\n Счет: ${this.state.snake.length.length}`)
+    alert(`Game over\n Score: ${this.getScore()}`)
     this.setState(copyObj(EntryState))
   }
 
