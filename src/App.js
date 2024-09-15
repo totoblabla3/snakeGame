@@ -81,7 +81,7 @@ export class App extends Component {
 
   componentDidMount() {
     alert("Начать игру")
-    setInterval(() => this._moveSnake(), this.state.snake.speed)
+    this._play()
     document.onkeydown = this._onKeyDown
   }
 
@@ -224,6 +224,9 @@ export class App extends Component {
     })
   }
 
+  getScore() {
+    return this.state.snake.length.length - 2
+  }
 
   _gameOver() {
     alert(`Ты проиграл\n Счет: ${this.state.snake.length.length}`)
@@ -232,6 +235,7 @@ export class App extends Component {
 
   render() {
     const {
+      pause,
       snake: {
         length,
         oldLength,
@@ -242,12 +246,23 @@ export class App extends Component {
 
     return (
       <div className="App">
-        <div
-          className="Map"
-          style={{ width: `${MAP_SIZE}px`, height: `${MAP_SIZE}px` }}
-        >
-          <Snake speed={speed} oldLength={oldLength} length={length} />
-          <Food food={food} />
+        <div className="wrapper">
+          <div className="header">
+            <div className="score">Score: {this.getScore()}</div>
+            <div className="pause">
+              {pause
+                ? <div onClick={() => this._play()}>play</div>
+                : <div onClick={() => this._pause()}>pause</div>
+              }
+            </div>
+          </div>
+          <div
+            className="Map"
+            style={{ width: `${MAP_SIZE}px`, height: `${MAP_SIZE}px` }}
+          >
+            <Snake speed={speed} oldLength={oldLength} length={length} />
+            <Food food={food} />
+          </div>
         </div>
       </div>
     )
