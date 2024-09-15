@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Snake, Food } from "./components/uiKit";
+import { useSwipeable } from 'react-swipeable';
 
 const UP = 'UP'
 const DOWN = 'DOWN'
 const RIGHT = 'RIGHT'
 const LEFT = 'LEFT'
+const SPACE = 'SPACE'
 
 const MAP_SIZE = 500
 const SPEED = 200
@@ -80,7 +82,7 @@ export class App extends Component {
   game_cycle = undefined
 
   componentDidMount() {
-    document.onkeydown = this._onKeyDown
+    document.onkeydown = this.handleKeyDown
 
     if (process.env.REACT_APP_DEV) return
     alert("Start the game?")
@@ -91,6 +93,21 @@ export class App extends Component {
     this._checkBorder()
     this._checkSnakeCollapse()
     this._eatFood()
+  }
+
+
+  _pause() {
+    clearInterval(this.game_cycle)
+    this.game_cycle = undefined
+    this.setState({ pause: true })
+  }
+
+  _play() {
+    this.game_cycle = setInterval(
+      () => this._moveSnake(),
+      this.state.snake.speed
+    )
+    this.setState({ pause: false })
   }
 
   _checkBorder() {
@@ -133,31 +150,55 @@ export class App extends Component {
     }
   }
 
-  _onKeyDown = (e) => {
+  handleKeyDown = (e) => {
     e = e || window.event
-    let { directions_stack } = this.state.snake
-
-    const stack = new DirectionsStack(directions_stack)
-    const last_direction = stack.getLast()
 
     if (e.keyCode === 32) {
       this.state.pause ? this._play() : this._pause()
-    } else if (this.state.pause) return
+    }
 
     switch (e.keyCode) {
       case 38: {
-        if (last_direction !== DOWN && last_direction !== UP) stack.push(UP)
+        this.updateStack(UP)
         break
       }
       case 40: {
-        if (last_direction !== UP && last_direction !== DOWN) stack.push(DOWN)
+        this.updateStack(DOWN)
         break
       }
       case 39: {
-        if (last_direction !== LEFT && last_direction !== RIGHT) stack.push(RIGHT)
+        this.updateStack(RIGHT)
         break
       }
       case 37: {
+        this.updateStack(LEFT)
+        break
+      }
+      default: { }
+    }
+  }
+
+  updateStack(direction) {
+    if (this.state.pause) return
+
+    let { directions_stack } = this.state.snake
+    const stack = new DirectionsStack(directions_stack)
+    const last_direction = stack.getLast()
+
+    switch (direction) {
+      case UP: {
+        if (last_direction !== DOWN && last_direction !== UP) stack.push(UP)
+        break
+      }
+      case DOWN: {
+        if (last_direction !== UP && last_direction !== DOWN) stack.push(DOWN)
+        break
+      }
+      case RIGHT: {
+        if (last_direction !== LEFT && last_direction !== RIGHT) stack.push(RIGHT)
+        break
+      }
+      case LEFT: {
         if (last_direction !== RIGHT && last_direction !== LEFT) stack.push(LEFT)
         break
       }
@@ -170,20 +211,6 @@ export class App extends Component {
         directions_stack: stack.getArray()
       }
     })
-  }
-
-  _pause() {
-    clearInterval(this.game_cycle)
-    this.game_cycle = undefined
-    this.setState({ pause: true })
-  }
-
-  _play() {
-    this.game_cycle = setInterval(
-      () => this._moveSnake(),
-      this.state.snake.speed
-    )
-    this.setState({ pause: false })
   }
 
   _moveSnake() {
@@ -247,24 +274,36 @@ export class App extends Component {
     } = this.state
 
     return (
-      <div className="App">
-        <div className="wrapper">
-          <div className="header">
-            <div className="score">Score: {this.getScore()}</div>
-            <div className="pause">
-              {pause
-                ? <div onClick={() => this._play()}>play</div>
-                : <div onClick={() => this._pause()}>pause</div>
-              }
+      <SwipeHandlerWrapper onSwipe={(d) => this.updateStack(d)}>
+        <div className="App">
+          <div className="wrapper">
+            <div className="header">
+              <div className="score">Score: {this.getScore()}</div>
+              <div className="pause">
+                {pause
+                  ? <div onClick={() => this._play()}>play</div>
+                  : <div onClick={() => this._pause()}>pause</div>
+                }
+              </div>
+            </div>
+            <div className="Map">
+              <Snake speed={speed} oldLength={oldLength} length={length} />
+              <Food food={food} />
             </div>
           </div>
-          <div className="Map">
-            <Snake speed={speed} oldLength={oldLength} length={length} />
-            <Food food={food} />
-          </div>
         </div>
-      </div>
+      </SwipeHandlerWrapper>
     )
   }
 }
 
+const SwipeHandlerWrapper = ({ children, onSwipe }) => {
+  const handlers = useSwipeable({
+    onSwipedUp: () => onSwipe(UP),
+    onSwipedDown: () => onSwipe(DOWN),
+    onSwipedLeft: () => onSwipe(LEFT),
+    onSwipedRight: () => onSwipe(RIGHT),
+  });
+
+  return <div {...handlers} className="wrapper">{children}</div>
+}
