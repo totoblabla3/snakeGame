@@ -43,3 +43,9 @@
     border: 1px solid #424645;
   }
 }
+
+@supports (-webkit-touch-callout: none) {
+  .App {
+    height: -webkit-fill-available;
+  }
+}
