@@ -17,10 +17,43 @@ const getRandomCoordinates = () => {
   return [x, y]
 }
 
+class DirectionsStack {
+  constructor(
+    array,
+  ) {
+    this.array = array
+  }
+
+  push(direction) {
+    if (this.array.length < 3) this.array.push(direction)
+  }
+
+  getArray() {
+    return this.array
+  }
+
+  getCurrent() {
+    return this.array[0]
+  }
+
+  getLast() {
+    return this.array[this.array.length - 1]
+  }
+
+  next() {
+    const next = this.array.at(1)
+    if (next) {
+      this.array.splice(0, 1)
+      return next
+    } else {
+      return this.array[0]
+    }
+  }
+}
+
 const EntryState = {
   snake: {
-    direction: RIGHT,
-    adjusted_direction: null,
+    directions_stack: [RIGHT],
     speed: SPEED,
     oldLength: [
       [0, 0],
@@ -98,74 +131,46 @@ export class App extends Component {
 
   _onKeyDown = (e) => {
     e = e || window.event
-    const { direction } = this.state.snake
-    let { adjusted_direction } = this.state.snake
+    let { directions_stack } = this.state.snake
 
-    if (adjusted_direction) return
+    const stack = new DirectionsStack(directions_stack)
+    const last_direction = stack.getLast()
 
     switch (e.keyCode) {
       case 38: {
-        adjusted_direction = direction !== DOWN ? (UP) : (DOWN)
+        if (last_direction !== DOWN && last_direction !== UP) stack.push(UP)
         break
       }
       case 40: {
-        adjusted_direction = direction !== UP ? (DOWN) : (UP)
+        if (last_direction !== UP && last_direction !== DOWN) stack.push(DOWN)
         break
       }
       case 39: {
-        adjusted_direction = direction !== LEFT ? (RIGHT) : (LEFT)
+        if (last_direction !== LEFT && last_direction !== RIGHT) stack.push(RIGHT)
         break
       }
       case 37: {
-        adjusted_direction = direction !== RIGHT ? (LEFT) : (RIGHT)
+        if (last_direction !== RIGHT && last_direction !== LEFT) stack.push(LEFT)
         break
       }
-      default: { adjusted_direction = direction }
+      default: { }
     }
+
     this.setState({
       snake: {
         ...this.state.snake,
-        direction,
-        adjusted_direction
+        directions_stack: stack.getArray()
       }
     })
   }
 
   _moveSnake() {
-    const { adjusted_direction, length } = this.state.snake
-    let { direction } = this.state.snake
+    const { directions_stack, length } = this.state.snake
+    const stack = new DirectionsStack(directions_stack)
     let newLength = [...this.state.snake.length]
     let head = length[length.length - 1]
-    let neck = length[length.length - 2]
 
-    // head - первый сегмент, neck - второй сегмент. 
-    // Каждый сегмент состоит из двух координат x и y и занимает 5 пикселей на игровом поле. 
-    // В следующем свиче проверяется, нет ли на пути скорректированного направления второго сегмента змейки. [][]->, []<-[].
-    // И если на пути второго сегмента нет, то направление движения поменяется на скорректированное. 
-
-    switch (adjusted_direction) {
-      case UP: {
-        if (head[1] - 5 !== neck[1]) direction = UP
-        break
-      }
-      case DOWN: {
-        if (head[1] + 5 !== neck[1]) direction = DOWN
-        break
-      }
-      case RIGHT: {
-        if (head[0] + 5 !== neck[0]) direction = RIGHT
-        break
-      }
-      case LEFT: {
-        if (head[0] - 5 !== neck[0]) direction = LEFT
-        break
-      }
-      default: {
-        console.warn('Неизвестное значение adjusted_direction: ', adjusted_direction)
-      }
-    }
-
-    switch (direction) {
+    switch (stack.next()) {
       case UP: {
         head = [head[0], head[1] - 5]
         break
@@ -182,9 +187,7 @@ export class App extends Component {
         head = [head[0] - 5, head[1]]
         break
       }
-      default: { 
-        console.warn('Неизвестное значение direction: ', direction)
-      }
+      default: { }
     }
 
     newLength.push(head)
@@ -196,8 +199,7 @@ export class App extends Component {
         ...this.state.snake,
         length: newLength,
         oldLength: length,
-        adjusted_direction: null,
-        direction
+        directions_stack: stack.getArray()
       }
     })
   }
@@ -210,10 +212,10 @@ export class App extends Component {
 
   render() {
     const {
-      snake: { 
-        length, 
-        oldLength, 
-        speed 
+      snake: {
+        length,
+        oldLength,
+        speed
       },
       items: { food }
     } = this.state
