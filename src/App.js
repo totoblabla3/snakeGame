@@ -53,6 +53,7 @@ class DirectionsStack {
 
 const EntryState = {
   snake: {
+    pause: false,
     directions_stack: [RIGHT],
     speed: SPEED,
     oldLength: [
@@ -76,6 +77,7 @@ const copyObj = (obj) => {
 export class App extends Component {
 
   state = copyObj(EntryState)
+  game_cycle = undefined
 
   componentDidMount() {
     alert("Начать игру")
@@ -136,6 +138,10 @@ export class App extends Component {
     const stack = new DirectionsStack(directions_stack)
     const last_direction = stack.getLast()
 
+    if (e.keyCode === 32) {
+      this.state.pause ? this._play() : this._pause()
+    } else if (this.state.pause) return
+
     switch (e.keyCode) {
       case 38: {
         if (last_direction !== DOWN && last_direction !== UP) stack.push(UP)
@@ -162,6 +168,20 @@ export class App extends Component {
         directions_stack: stack.getArray()
       }
     })
+  }
+
+  _pause() {
+    clearInterval(this.game_cycle)
+    this.game_cycle = undefined
+    this.setState({ pause: true })
+  }
+
+  _play() {
+    this.game_cycle = setInterval(
+      () => this._moveSnake(),
+      this.state.snake.speed
+    )
+    this.setState({ pause: false })
   }
 
   _moveSnake() {
