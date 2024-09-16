@@ -20,12 +20,6 @@
     "commit": "git add . && git commit -m 'new commit' && git push",
     "deploy": "gh-pages -d build"
   },
-  "eslintConfig": {
-    "extends": "react-app",
-    "rules": {
-      "react-hooks/exhaustive-deps": "off"
-    }
-  },
   "browserslist": {
     "production": [
       ">0.2%",
