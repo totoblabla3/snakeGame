@@ -84,7 +84,7 @@ export class App extends Component {
     document.onkeydown = this.handleKeyDown
 
     if (process.env.REACT_APP_DEV) return
-    alert("On laptop: Use WASD or arrows. Press space to pause. \nOn touchscreen: Use swipes. Double tap to pause\n\nStart the game?")
+    alert("On laptop: Use WASD or arrows. Press space to pause. \nOn touchscreen: Use swipes. Double tap to pause.\n\nStart the game?")
     this._play()
   }
 
