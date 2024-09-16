@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import './App.css';
 import { Snake, Food } from "./components/uiKit";
 import { useSwipeable } from 'react-swipeable';
@@ -274,23 +274,25 @@ export class App extends Component {
 
     return (
       <SwipeHandlerWrapper onSwipe={(d) => this.updateStack(d)}>
-        <div className="App">
-          <div className="wrapper">
-            <div className="header">
-              <div className="score">Score: {this.getScore()}</div>
-              <div className="pause">
-                {pause
-                  ? <div onClick={() => this._play()}>play</div>
-                  : <div onClick={() => this._pause()}>pause</div>
-                }
+        <DoubleClickHandler onDoubleClick={() => pause ? this._play() : this._pause()}>
+          <div className="App">
+            <div className="wrapper">
+              <div className="header">
+                <div className="score">Score: {this.getScore()}</div>
+                <div className="pause">
+                  {pause
+                    ? <div onClick={() => this._play()}>play</div>
+                    : <div onClick={() => this._pause()}>pause</div>
+                  }
+                </div>
+              </div>
+              <div className="Map">
+                <Snake speed={speed} oldLength={oldLength} length={length} />
+                <Food food={food} />
               </div>
             </div>
-            <div className="Map">
-              <Snake speed={speed} oldLength={oldLength} length={length} />
-              <Food food={food} />
-            </div>
           </div>
-        </div>
+        </DoubleClickHandler >
       </SwipeHandlerWrapper>
     )
   }
@@ -305,4 +307,16 @@ const SwipeHandlerWrapper = ({ children, onSwipe }) => {
   });
 
   return <div {...handlers} className="wrapper">{children}</div>
+}
+
+const DoubleClickHandler = ({ children, onDoubleClick = () => null, delay = 250 }) => {
+  const [click, setClick] = useState(0)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setClick(0), delay);
+    if (click === 2) onDoubleClick()
+    return () => clearTimeout(timer)
+  }, [click]);
+
+  return <div className="wrapper" onClick={() => setClick(prev => prev + 1)}>{children}</div>
 }
