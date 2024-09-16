@@ -157,6 +157,7 @@ export class App extends Component {
     }
 
     switch (e.keyCode) {
+      //Стрелки
       case 38: {
         this.updateStack(UP)
         break
@@ -171,6 +172,23 @@ export class App extends Component {
       }
       case 37: {
         this.updateStack(LEFT)
+        break
+      }
+      //Буквы
+      case 87: {
+        this.updateStack(UP)
+        break
+      }
+      case 83: {
+        this.updateStack(DOWN)
+        break
+      }
+      case 65: {
+        this.updateStack(LEFT)
+        break
+      }
+      case 68: {
+        this.updateStack(RIGHT)
         break
       }
       default: { }
